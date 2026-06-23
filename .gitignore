@@ -1,0 +1,28 @@
+__pycache__
+
+# Temporary files
+*.swp
+.\#*
+\#*
+*~
+
+# Packaging
+MANIFEST
+dist/
+build/
+sdist/
+*.egg/
+*.egg-info/
+
+# Misc
+.coverage*
+.eggs/
+.mypy_cache/
+.nox
+.python-version
+.pytype
+.taplo.toml
+.venv
+.vscode/
+cov*.xml
+venv

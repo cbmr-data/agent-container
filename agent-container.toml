@@ -1,0 +1,25 @@
+# Example global configuration file. To be saved as `/etc/agent-container.toml`.
+
+# Regular expressions describing the paths of allowed workspaces. Matches are
+# performed on resolved paths that always end with a `/`. The expression must
+# match the entire path.
+allowed_workspaces = [
+    # "/maps/projects/\w+(-AUDIT)?/people/\w+/.*",
+]
+
+# Regular expressions describing paths that should never be allowed, even if they
+# match a pattern in `allowed_workspaces`. As above, matches are performed on resolved
+# paths that always end with a `/`, but unlike `allowed_workspaces` a pattern need only
+# match the start of a path. For example, `/maps/projects/\w+-AUDIT/data/` excludes
+# that folder and everything below it.
+disallowed_workspaces = [
+    # "/maps/projects/\w+-AUDIT/data/",
+]
+
+# Default singularity container containing agents; may be overridden by setting the
+# environment variable `AGENT_CONTAINER`
+container = "/path/to/container.sif"
+
+# List of absolute paths to folders that should always be mounted. These paths must
+# be valid workspaces according to the allowed/disallowed lists above
+# includes = []
