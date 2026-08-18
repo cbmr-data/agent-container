@@ -117,9 +117,12 @@ ENV LC_ALL=en_US.utf8
 # Configure simple prompt that to identify `agent-container` shells
 # and ensure that locally installed tools (e.g. claude) are accessible
 RUN mkdir -p /.singularity.d/env/ \
-    && echo 'export PS1="(agent-container) \w $ "' > /.singularity.d/env/99-custom.sh \
-    && echo 'export PATH=$HOME/.local/bin:$PATH' >> /.singularity.d/env/99-custom.sh \
-    && echo 'export PATH=$HOME/.pixi/bin:$PATH' >> /.singularity.d/env/99-custom.sh
+    && echo 'export PS1="(agent-container) \w $ "' > /.singularity.d/env/99-01-custom.sh \
+    && echo 'export PATH=$HOME/.local/bin:$PATH' >> /.singularity.d/env/99-01-custom.sh \
+    && echo 'export PATH=$HOME/.pixi/bin:$PATH' >> /.singularity.d/env/99-01-custom.sh
+
+# Allow the user to set custom exports via ~/.profile
+RUN echo 'test -e ~/.profile && . ~/.profile' > /.singularity.d/env/99-02.profile.sh
 
 COPY --chmod=555 entrypoint.sh /bin/entrypoint.sh
 
