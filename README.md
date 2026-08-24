@@ -1,19 +1,23 @@
 # agent-container -- run AI agents with limited scope
 
-`agent-container` is a sandbox meant for simplifying the use of AI coding agents on systems where users have access to sensitive data.
+`agent-container` is a sandbox meant for simplifying the use of AI coding agents
+on systems where users have access to sensitive data.
 
-Agents are run in a [Singularity] (Apptainer) container that only has access to your current working directory, to any folders you explicitly include, and to a persistent home folder (separate from your normal home folder).
+Agents are run in a [Singularity] (Apptainer) container that only has access to
+your current working directory, to any folders you explicitly include, and to a
+persistent home folder (separate from your normal home folder).
 
-The sandbox includes `claude`, `codex`, `gemini`, `copilot` and `vibe`,
-together with a set of common development tools (`git`, `gh`, `jq`, `ripgrep`,
-`fd`, Node.js, `uv`, `pixi`, Python, and a C/C++ toolchain, on top of a Debian
-base image.
+The sandbox includes `claude`, `codex`, `gemini`, `copilot` and `vibe`, together
+with a set of common development tools (`git`, `gh`, `jq`, `ripgrep`, `fd`,
+Node.js, `uv`, `pixi`, Python, and a C/C++ toolchain, on top of a Debian base
+image.
 
 ## Limitations
 
 - Folder allow/disallow lists are based on regular expressions. Therefore, if
   you allow `/some/path` and disallow `/some/path/data`, then the user will be
-  able to start a sandbox in `/some/path` that includes access to `/some/path/data`.
+  able to start a sandbox in `/some/path` that includes access to
+  `/some/path/data`.
 
 ## Requirements
 
@@ -79,12 +83,12 @@ data exfiltration.
 
 ## Workspaces
 
-Each agent run is given a *home* directory that persists between invocations, so
+Each agent run is given a _home_ directory that persists between invocations, so
 agent configuration, credentials, and history are retained. By default, all
 allowed directories share a single `global` home.
 
 Running `agent-container new` in a directory instead creates a dedicated
-*workspace* for it, giving that directory, and everything beneath it, its own
+_workspace_ for it, giving that directory, and everything beneath it, its own
 isolated home.
 
 ```console
@@ -110,7 +114,8 @@ Configuration files are located at `/etc/agent-container.toml` and
 `~/.config/agent-container.toml`. If no configuration files exist, then
 workspaces are permitted to be created anywhere.
 
-The [configuration file](agent-container.toml) is a TOML file with the following content:
+The [configuration file](agent-container.toml) is a TOML file with the following
+content:
 
 ```toml
 # Regular expressions describing the paths of allowed workspaces. Matches are
@@ -148,9 +153,9 @@ merged as follows:
 
 ## Environment variables
 
-| Variable | Description |
-| --- | --- |
-| `AGENT_CONTAINER` | Absolute path to Singularity image, overriding `container` in the configuration file. |
+| Variable                  | Description                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENT_CONTAINER`         | Absolute path to Singularity image, overriding `container` in the configuration file.                                           |
 | `AGENT_CONTAINER_STORAGE` | Absolute path to the directory used for workspace metadata and per-workspace homes (default: `~/.local/share/agent-container`). |
 
 ## Building the container image
