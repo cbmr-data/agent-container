@@ -157,9 +157,12 @@ def main(argv: list[str] | None = None) -> int:
 
         return 0
 
-    singularity = shutil.which("singularity")
-    if singularity is None:
-        LOG.critical("`singularity` not found on PATH")
+    for executable in ("apptainer", "singularity"):
+        if singularity := shutil.which(executable):
+            LOG.debug("running containers using '%s'", singularity)
+            break
+    else:
+        LOG.critical("neither `apptainer` nor `singularity` not found on PATH")
         return 1
 
     if (container := select_container(config.container)) is None:
