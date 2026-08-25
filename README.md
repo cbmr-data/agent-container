@@ -24,13 +24,19 @@ image.
 - Python 3.12 or newer
 - [`uv`][uv] for installing and managing the project
 - [Singularity] / Apptainer available on `PATH` to run agents
-- [Podman] (or another OCI builder) and Singularity to build the container image
+- [Podman] or [Docker] to build the container image
 
-## Installation
+## Installation and upgrading
+
+Download the latest version `agent-container`:
+
+```bash
+git clone https://github.com/cbmr-data/agent-container.git
+```
 
 For single-user use, it is recommended to install the program using [`uv`][uv]:
 
-```console
+```bash
 uv tool install /path/to/agent-container
 agent-container --help
 ```
@@ -38,42 +44,101 @@ agent-container --help
 Alternatively, the program may be installed in a virtual environment using `uv`
 or `pip`:
 
-```console
+```bash
 # using uv
 uv venv
 uv pip install /path/to/agent-container
 uv run agent-container --help
 # or, using pip
 python3 -m venv venv
-venv/bin/pip install /path/to/agent-container
-venv/bin/agent-container --help
+./venv/bin/pip install /path/to/agent-container
+./venv/bin/agent-container --help
 ```
 
-Before agents can be started, you must build a container image (see
-[Building the container image](#building-the-container-image)). The location of
-this image can be specified via a global or a per-user configuration file (see
-[Configuration](#configuration)) or via the `AGENT_CONTAINER` environment
-variable.
+### Building the container image
+
+Before agents can be started, you must build a Singularity container image. This
+may be done using the included [`Makefile`](Makefile), which uses Podman or
+Docker to build an OCI image, and then converts it to a Singularity `.sif`
+image.
+
+```bash
+cd /path/to/agent-container
+make sif                 # build using podman,
+make sif MANAGER=podman  # or build using podman (explicitly),
+make sif MANAGER=docker  # or build using docker
+```
+
+Images are time-stamped using the current date, so that an updated image can be
+generated simply by running `make` again. Additionally, a symlink named
+`agent-container-latest.sif` is automatically created that points to the latest
+`.sif` file.
+
+### Minimal configuration
+
+For `agent-container` to locate the `.sif` file, you must either create a
+`agent-container.toml` configuration file as described below or set the
+`AGENT_CONTAINER` environment variable so that the script can locate the `.sif`
+file:
+
+```bash
+export AGENT_CONTAINER=/path/to/agent-container/build/agent-container-latest.sif
+```
+
+You can save this command in your `~/.bashrc` (or other such) file, but note
+that you will need to remove the command if you subsequently want to set the
+path using a `agent-container.toml` file, since the environment variable is
+given priority.
+
+For example, while in the
+
+### Upgrading
+
+To upgrade `agent-container`, download the latest version and repeat the
+`install` command you used:
+
+```bash
+cd /path/to/agent-container # 1. download latest version
+git pull
+uv tool install .
+```
+
+For installations in a virtual environment, repeat the `install` command used
+above, e.g:
+
+```bash
+cd /path/to/uv-venv/
+uv pip install /path/to/agent-container
+```
+
+or
+
+```bash
+cd /path/to/pip-venv/
+./venv/bin/pip install /path/to/agent-container
+```
+
+Remember to also (re)build the container image as described above.
 
 ## Example usage
 
 To start a sandbox, run `agent-container` with one of the supported agents:
 
-```console
+```bash
 cd /path/to/project
 agent-container claude
 ```
 
 Any arguments after the command are passed on to the agent or shell unchanged:
 
-```console
+```bash
 agent-container claude --help
 ```
 
 To include additional host folders in the sandbox, use the `--include` option
 one or more times:
 
-```console
+```bash
 agent-container --include /path/to/other/project claude
 ```
 
@@ -91,7 +156,7 @@ Running `agent-container new` in a directory instead creates a dedicated
 _workspace_ for it, giving that directory, and everything beneath it, its own
 isolated home.
 
-```console
+```bash
 $ cd /path/to/my/workspace
 $ agent-container new
 workspace configured in '/path/to/my/workspace'
@@ -102,13 +167,13 @@ This workspace will be used for all sessions that are started in, or under,
 
 Use `agent-container list` to see the configured workspaces:
 
-```console
+```bash
 $ agent-container list
 ─ /path/to/my/workspace
     └ No paths included
 ```
 
-## Configuration
+## Configuration files
 
 Configuration files are located at `/etc/agent-container.toml` and
 `~/.config/agent-container.toml`. If no configuration files exist, then
@@ -158,22 +223,7 @@ merged as follows:
 | `AGENT_CONTAINER`         | Absolute path to Singularity image, overriding `container` in the configuration file.                                           |
 | `AGENT_CONTAINER_STORAGE` | Absolute path to the directory used for workspace metadata and per-workspace homes (default: `~/.local/share/agent-container`). |
 
-## Building the container image
-
-Building is driven by the included [`Makefile`](Makefile) and uses Podman or
-Docker to build an OCI image, which is then converted into a Singularity `.sif`
-image.
-
-```console
-make sif
-```
-
-To build the container using Docker, instead run
-
-```console
-make sif MANAGER=docker
-```
-
+[docker]: https://www.docker.com/
 [podman]: https://podman.io/
 [singularity]: https://sylabs.io/singularity/
 [uv]: https://docs.astral.sh/uv/
