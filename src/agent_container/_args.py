@@ -58,7 +58,8 @@ def parse_args(argv: list[str]) -> Args:
         "--read-only",
         default=False,
         action="store_true",
-        help="Mount the current folder and included folders as read-only",
+        help="Mount the current folder and included folders as read-only. Does not "
+        "affect includes explicitly flagged with `:ro` or `:rw`",
     )
 
     parser.add_argument(
@@ -66,7 +67,11 @@ def parse_args(argv: list[str]) -> Args:
         type=_non_empty_path,
         default=[],
         action="append",
-        help="Mount this folder in addition to the current directory",
+        help="Make this this folder available in the agent container. By default, "
+        "included folders are writable unless the `--read-only` option is used. "
+        "Alternatively, the paths pay be suffixed with `:ro` or `:rw` to explicitly "
+        "mark them as read-only or read/writable, in which caes `--read-only` does not "
+        "affect the include",
     )
 
     parser.add_argument(
