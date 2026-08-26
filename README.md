@@ -185,9 +185,10 @@ content:
 ```toml
 # Regular expressions describing the paths of allowed workspaces. Matches are
 # performed on resolved paths that always end with a `/`. The expression must
-# match the entire path.
+# match the entire path. If `allowed_workspaces` is not set, then all paths that
+# are not explicitly disallowed are permitted.
 allowed_workspaces = [
-    # "/maps/projects/\\w+(-AUDIT)?/people/\\w+/.*",
+  # "/maps/projects/\w+(-AUDIT)?/people/\w+/.*",
 ]
 
 # Regular expressions describing paths that should never be allowed, even if
@@ -225,7 +226,34 @@ merged as follows:
 | `AGENT_CONTAINER`         | Absolute path to Singularity image, overriding `container` in the configuration file.                                           |
 | `AGENT_CONTAINER_STORAGE` | Absolute path to the directory used for workspace metadata and per-workspace homes (default: `~/.local/share/agent-container`). |
 
+## Customizing the container
+
+It is recommended to use [`uv`][uv] and [`pixi`][pixi] to install dependencies
+in the container, as this greatly simplifies the process:
+
+```bash
+# 1. installing python software using `uv tool`:
+$ uv tool install mdformat --with mdformat-gfm
+$ mdformat --version
+mdformat 1.0.0 (mdformat-gfm 1.0.0)
+
+# 2. install conda packages using `pixi global`:
+$ pixi global install ncdu
+$ ncdu --version
+ncdu 1.22
+```
+
+By design, the agent-container does not inherit environment variables from the
+environment in which it was executed. Instead, you can set environment variables
+in the environment using the per-workspace `~/.profile` file:
+
+```bash
+$ agent-container shell
+$ nano ~/.profile
+```
+
 [docker]: https://www.docker.com/
+[pixi]: https://pixi.prefix.dev
 [podman]: https://podman.io/
 [singularity]: https://sylabs.io/singularity/
 [uv]: https://docs.astral.sh/uv/
