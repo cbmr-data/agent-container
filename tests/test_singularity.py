@@ -11,6 +11,20 @@ def test_binddir_format_read_only() -> None:
     assert BindDir(Path("/a"), Path("/b")).format(read_only=True) == "/a:/b:ro"
 
 
+def test_binddir_respects_mode() -> None:
+    src = Path("/a")
+    dst = Path("/b")
+
+    assert BindDir(src, dst, mode=None).format(read_only=False) == "/a:/b"
+    assert BindDir(src, dst, mode=None).format(read_only=True) == "/a:/b:ro"
+
+    assert BindDir(src, dst, mode="rw").format(read_only=False) == "/a:/b:rw"
+    assert BindDir(src, dst, mode="rw").format(read_only=True) == "/a:/b:rw"
+
+    assert BindDir(src, dst, mode="ro").format(read_only=False) == "/a:/b:ro"
+    assert BindDir(src, dst, mode="ro").format(read_only=True) == "/a:/b:ro"
+
+
 def test_binddir_format_escapes_src() -> None:
     def _format(a: str | Path, b: str | Path) -> str:
         return BindDir(Path(a), Path(b)).format(read_only=False)

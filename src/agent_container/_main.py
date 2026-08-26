@@ -6,7 +6,9 @@ import logging
 import re
 import shutil
 import sys
+from collections.abc import Iterable
 from pathlib import Path
+from typing import Literal
 
 import colorlog
 
@@ -59,24 +61,37 @@ def select_container(default_container: Path | None) -> Path | None:
 
 def prepare_binds(
     filters: PathFilters,
-    *includes: Path,
+    includes: Iterable[Path],
 ) -> list[BindDir] | None:
     any_errors = False
-    binds: set[BindDir] = set()
+    binds: dict[Path, BindDir] = {}
 
     for include in includes:
+        mode: Literal["ro", "rw"] | None
+        for mode in ("ro", "rw"):  # zuban: ignore[assignment]
+            flag = f":{mode}"
+            if include.name.endswith(flag):
+                include = include.parent / include.name.removesuffix(flag)
+                break
+        else:
+            mode = None
+
         if include != include.resolve():
             # This should not happen; config requires resolved paths and args resolves
             LOG.critical("BUG: unresolved including directory '%s'", include)
             any_errors = True
         elif filters(include):
-            LOG.debug("including directory '%s'", include)
-            binds.add(BindDir(include, include))
+            bind = BindDir(include, include, mode)
+            if binds.setdefault(include, bind) != bind:
+                LOG.error("include with conflicting :ro/:rw flags: '%s'", include)
+                any_errors = True
+            else:
+                LOG.debug("including directory '%s'", include)
         else:
             LOG.error("include directory is invalid: '%s'", include)
             any_errors = True
 
-    return None if any_errors else list(binds)
+    return None if any_errors else list(binds.values())
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -168,7 +183,7 @@ def main(argv: list[str] | None = None) -> int:
     if (container := select_container(config.container)) is None:
         return 1
 
-    if (binds := prepare_binds(filters, *config.includes, *args.include)) is None:
+    if (binds := prepare_binds(filters, [*config.includes, *args.include])) is None:
         return 1
 
     if args.command == "shell":

@@ -196,16 +196,18 @@ allowed_workspaces = [
 # a pattern need only match the start of a path. For example,
 # `/maps/projects/\w+-AUDIT/data/` excludes that folder and everything below it.
 disallowed_workspaces = [
-    # "/maps/projects/\\w+-AUDIT/data/",
+  # "/maps/projects/\w+-AUDIT/data/",
 ]
 
-# Default Singularity container containing the agents; may be overridden by
-# setting the environment variable `AGENT_CONTAINER`. Must be an absolute path.
+# Default singularity container containing agents; may be overridden by setting
+# the environment variable `AGENT_CONTAINER`
 container = "/path/to/container.sif"
 
 # List of absolute paths to folders that should always be mounted. These paths
-# must be valid workspaces according to the allowed/disallowed lists above
-includes = []
+# must be valid workspaces according to the allowed/disallowed lists above.
+# Includes may end with `:ro` to indicate read-only paths (e.g. for datasets) or
+# `:rw` to indicate writable paths (e.g. tmp/scratch folders). The `--read-only`
+# option does not affect includes marked in this manner. includes = []
 ```
 
 If both a global and a user configuration file is specified, then the two are

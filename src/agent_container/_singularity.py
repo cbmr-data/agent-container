@@ -5,9 +5,10 @@ from __future__ import annotations
 import logging
 import os
 from collections.abc import Iterable
+from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
-from typing import NamedTuple
+from typing import Literal
 
 from agent_container._common import SequenceNotStr
 
@@ -25,24 +26,36 @@ class SingularityError(RuntimeError):
     pass
 
 
-class BindDir(NamedTuple):
+@dataclass(frozen=True)
+class BindDir:
     src: Path
     dst: Path
+    mode: Literal["ro", "rw"] | None = None
 
     def format(self, *, read_only: bool) -> str:
         """Format bind-dirs to be used as --bind arguments"""
+        escaped_path: list[str] = [
+            BindDir._escape_path(self.src),
+            ":",
+            BindDir._escape_path(self.dst),
+        ]
+
+        mode = self.mode
+        if mode is None and read_only:
+            mode = "ro"
+
+        if mode is not None:
+            escaped_path.append(f":{mode}")
+
+        return "".join(escaped_path)
+
+    @staticmethod
+    def _escape_path(path: Path) -> str:
         escaped_path: list[str] = []
-        for idx, path in enumerate(self):
-            if idx != 0:
-                escaped_path.append(":")
-
-            for char in str(path):
-                if char in ",:\\":
-                    escaped_path.append("\\")
-                escaped_path.append(char)
-
-        if read_only:
-            escaped_path.append(":ro")
+        for char in str(path):
+            if char in ",:\\":
+                escaped_path.append("\\")
+            escaped_path.append(char)
 
         return "".join(escaped_path)
 
