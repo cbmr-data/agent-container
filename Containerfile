@@ -126,4 +126,4 @@ RUN echo 'test -e ~/.profile && . ~/.profile' > /.singularity.d/env/99-02.profil
 
 COPY --chmod=555 entrypoint.sh /bin/entrypoint.sh
 
-ENTRYPOINT [ "/bin/entrypoint.sh" ]
+ENTRYPOINT [ "/bin/bash", "/bin/entrypoint.sh" ]
