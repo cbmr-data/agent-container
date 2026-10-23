@@ -54,6 +54,8 @@ def tests(session: nox.Session) -> None:
         "-m",
         "pytest",
         "--quiet",
+        "--tb",
+        "line",
         "tests",
         "--cov",
         "agent_container",
