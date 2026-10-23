@@ -194,6 +194,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command not in SHELL_COMMANDS and args.command not in AGENT_COMMANDS:
         raise NotImplementedError(f"unexpected command {args.command!r}")
 
+    extra: list[str] = []
+    if args.command == "codex":
+        # Background daemon not work in a singularity container
+        extra.append("--no-daemon")
+
     # storage must be created before running singularity
     (agent_storage / workspace.key).mkdir(mode=0o700, exist_ok=True)
 
@@ -205,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
             cwd=cwd,
             binds=binds,
             read_only=args.read_only,
-            argv=[args.command, *args.arguments],
+            argv=[args.command, *extra, *args.arguments],
         )
     except SingularityError as error:
         LOG.critical("error running singularity: %s", error)
