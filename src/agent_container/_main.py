@@ -199,14 +199,17 @@ def main(argv: list[str] | None = None) -> int:
         # Background daemon not work in a singularity container
         extra.append("--no-daemon")
 
-    # storage must be created before running singularity
+    # storage and workdir must be created before running singularity
     (agent_storage / workspace.key).mkdir(mode=0o700, exist_ok=True)
+    # storage must be created before running singularity
+    (agent_storage / f"{workspace.key}.workdir").mkdir(mode=0o700, exist_ok=True)
 
     try:
         run_singularity(
             exe=singularity,
             image=container,
             home=agent_storage / workspace.key,
+            workdir=agent_storage / f"{workspace.key}.workdir",
             cwd=cwd,
             binds=binds,
             read_only=args.read_only,

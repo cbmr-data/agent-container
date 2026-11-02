@@ -65,6 +65,7 @@ def run_singularity(
     exe: str,
     image: Path,
     home: Path,
+    workdir: Path,
     cwd: Path,
     binds: Iterable[BindDir] = (),
     argv: SequenceNotStr[str] = (),
@@ -75,6 +76,8 @@ def run_singularity(
         "run",
         "--containall",
         "--writable-tmpfs",
+        "--workdir",
+        str(workdir),
         "--home",
         BindDir(home, SINGULARITY_HOME).format(read_only=False),
         "--pwd",
@@ -108,3 +111,7 @@ def _format_binds(binds: Iterable[BindDir], *, read_only: bool) -> str:
             )
 
     return ",".join(bind.format(read_only=read_only) for bind in binds)
+
+
+def _tmpdir() -> str:
+    return os.getenv("TMPDIR") or "/tmp"  # noqa: S108
