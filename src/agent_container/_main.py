@@ -198,6 +198,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "codex":
         # Background daemon not work in a singularity container
         extra.append("--no-daemon")
+        # bwrap does not work inside a singularity container
+        extra.extend(("--sandbox", "danger-full-access"))
 
     # storage and workdir must be created before running singularity
     (agent_storage / workspace.key).mkdir(mode=0o700, exist_ok=True)
